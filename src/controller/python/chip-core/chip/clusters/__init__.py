@@ -1,6 +1,5 @@
 #
-#    Copyright (c) 2020 Project CHIP Authors
-#    Copyright (c) 2019 Google LLC.
+#    Copyright (c) 2021 Project CHIP Authors
 #    All rights reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,3 +21,7 @@
 #
 
 """Provides Python APIs for CHIP."""
+from . import Command
+from . import Attribute
+from .Objects import *
+from . import CHIPClusters

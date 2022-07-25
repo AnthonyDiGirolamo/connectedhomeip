@@ -1,0 +1,39 @@
+# Copyright (c) 2020 Project CHIP Authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build_overrides/build.gni")
+import("//build_overrides/chip.gni")
+import("//build_overrides/pigweed.gni")
+
+import("$dir_pw_build/python.gni")
+
+pw_python_package("chip-clusters") {
+  setup = [
+    "pyproject.toml",
+    "setup.cfg",
+    "setup.py",
+  ]
+  sources = [
+    "chip/__init__.py",
+    "chip/ChipUtility.py",
+    "chip/clusters/__init__.py",
+    "chip/clusters/CHIPClusters.py",
+    "chip/clusters/ClusterObjects.py",
+    "chip/clusters/Command.py",
+    "chip/clusters/Objects.py",
+    "chip/clusters/TestObjects.py",
+    "chip/clusters/Types.py",
+    "chip/tlv/__init__.py",
+  ]
+}
