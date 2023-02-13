@@ -23,7 +23,9 @@ import coloredlogs
 from builders.builder import BuilderOptions
 from runner import PrintOnlyRunner, ShellRunner
 
+import pw_cli.log
 import build
+
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
@@ -138,7 +140,13 @@ def main(context, log_level, target, repo,
     log_fmt = '%(asctime)s %(levelname)-7s %(message)s'
     if no_log_timestamps:
         log_fmt = '%(levelname)-7s %(message)s'
-    coloredlogs.install(level=__LOG_LEVELS__[log_level], fmt=log_fmt)
+    # coloredlogs.install(level=__LOG_LEVELS__[log_level], fmt=log_fmt)
+    pw_cli.log.install(
+        level=__LOG_LEVELS__[log_level],
+        use_color=True,
+        hide_timestamp=False,
+    )
+
 
     if 'PW_PROJECT_ROOT' not in os.environ:
         raise click.UsageError("""
@@ -209,6 +217,7 @@ def cmd_targets(context, expand):
 @click.pass_context
 def cmd_build(context, copy_artifacts_to, create_archives):
     context.obj.Build()
+    context.obj.run_pw_build()
 
     if copy_artifacts_to:
         context.obj.CopyArtifactsTo(copy_artifacts_to)

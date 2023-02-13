@@ -1,11 +1,16 @@
 import logging
 import os
 import shutil
+from pathlib import Path
 from enum import Enum, auto
 from typing import Sequence
 
 from .targets import BUILD_TARGETS
 from builders.builder import BuilderOptions
+
+from pw_build.build_recipe import BuildRecipe, BuildCommand
+from pw_build.project_builder import ProjectBuilder, run_builds
+from pw_watch.watch import run_watch, watch_setup
 
 
 class BuildSteps(Enum):
@@ -69,6 +74,47 @@ class Context:
         for builder in self.builders:
             logging.info('Building %s', builder.output_dir)
             builder.build()
+
+    def build_recipes(self) -> list[BuildRecipe]:
+        recipes: list[BuildRecipe] = []
+        for name, steps in self.runner.recipe_steps.items():
+            recipes.append(
+                BuildRecipe(
+                    build_dir=Path(self.output_prefix) / name,
+                    title=name,
+                    steps=[BuildCommand(command=cmd) for cmd in steps]))
+
+        return recipes
+
+    def run_pw_build(self) -> None:
+        root_logfile = Path(self.output_prefix) / 'build.txt'
+        root_logger = logging.getLogger('pw_build')
+
+        project_builder = ProjectBuilder(
+            build_recipes=self.build_recipes(),
+            banners=True,
+            log_level=logging.INFO,
+            separate_build_file_logging=True,
+            root_logger=root_logger,
+            root_logfile=root_logfile,
+        )
+        # project_builder.use_stdout_proxy()
+        # run_builds(project_builder, workers=2)
+
+        event_handler, exclude_list = watch_setup(
+            project_builder,
+            parallel=True,
+            parallel_workers=3,
+            fullscreen=True,
+            logfile=root_logfile,
+            separate_logfiles=True,
+        )
+
+        run_watch(
+            event_handler,
+            exclude_list,
+            fullscreen=True,
+        )
 
     def CleanOutputDirectories(self):
         for builder in self.builders:

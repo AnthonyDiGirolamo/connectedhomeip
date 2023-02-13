@@ -57,7 +57,7 @@ class ShellRunner:
     def StartCommandExecution(self):
         pass
 
-    def Run(self, cmd, title=None):
+    def Run(self, cmd, title=None, identifier=None):
         outpipe = LogPipe(logging.INFO)
         errpipe = LogPipe(logging.WARN)
 
