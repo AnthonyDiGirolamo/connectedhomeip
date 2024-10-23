@@ -17,6 +17,7 @@ import("//build_overrides/chip.gni")
 import("//build_overrides/pigweed.gni")
 
 import("$dir_pw_build/python.gni")
+import("$dir_pw_build/python_dist.gni")
 
 import("${chip_root}/build/chip/python_wheel.gni")
 import("${chip_root}/build/chip/tools.gni")
@@ -151,6 +152,105 @@ shared_library("ChipDeviceCtrl") {
   }
 
   configs += [ ":controller_wno_deprecate" ]
+}
+
+pw_python_package("chip-core-module") {
+  generate_setup = {
+    metadata = {
+      name = "chip-core"
+      version = "1.0.0"
+    }
+    options = {
+      install_requires = [
+        "coloredlogs",
+        "construct",
+        "cryptography",
+        "dacite",
+        "deprecation",
+        "ecdsa",
+        "ipdb",
+        "pyyaml",
+        "rich",
+      ]
+    }
+  }
+  sources = [
+    "chip/CertificateAuthority.py",
+    "chip/ChipBleBase.py",
+    "chip/ChipBleUtility.py",
+    "chip/ChipBluezMgr.py",
+    "chip/ChipCommissionableNodeCtrl.py",
+    "chip/ChipStack.py",
+    "chip/FabricAdmin.py",
+    "chip/__init__.py",
+    "chip/ble/__init__.py",
+    "chip/ble/commissioning/__init__.py",
+    "chip/ble/get_adapters.py",
+    "chip/ble/library_handle.py",
+    "chip/ble/scan_devices.py",
+    "chip/ble/types.py",
+    "chip/clusters/Attribute.py",
+    "chip/clusters/Command.py",
+    "chip/clusters/__init__.py",
+    "chip/commissioning/__init__.py",
+    "chip/commissioning/commissioning_flow_blocks.py",
+    "chip/commissioning/pase.py",
+    "chip/configuration/__init__.py",
+    "chip/credentials/__init__.py",
+    "chip/credentials/cert.py",
+    "chip/crypto/__init__.py",
+    "chip/crypto/fabric.py",
+    "chip/crypto/p256keypair.py",
+    "chip/discovery/__init__.py",
+    "chip/discovery/library_handle.py",
+    "chip/discovery/types.py",
+    "chip/exceptions/__init__.py",
+    "chip/interaction_model/__init__.py",
+    "chip/interaction_model/delegate.py",
+    "chip/internal/__init__.py",
+    "chip/internal/commissioner.py",
+    "chip/internal/thread.py",
+    "chip/internal/types.py",
+    "chip/logging/__init__.py",
+    "chip/logging/library_handle.py",
+    "chip/logging/types.py",
+    "chip/native/__init__.py",
+    "chip/setup_payload/__init__.py",
+    "chip/setup_payload/setup_payload.py",
+    "chip/storage/__init__.py",
+    "chip/tracing/__init__.py",
+    "chip/utils/CommissioningBuildingBlocks.py",
+    "chip/utils/__init__.py",
+    "chip/yaml/__init__.py",
+    "chip/yaml/data_model_lookup.py",
+    "chip/yaml/errors.py",
+    "chip/yaml/format_converter.py",
+    "chip/yaml/runner.py",
+  ]
+  if (chip_controller) {
+    sources += [ "chip/ChipDeviceCtrl.py" ]
+  } else {
+    sources += [ "chip/server/__init__.py" ]
+  }
+}
+
+pw_python_distribution("chip-core-dist") {
+  packages = [":chip-core-module"]
+  generate_setup_cfg = {
+    name = "chip-core"
+    version = "0.0.1"
+    common_config_file = "chip-core-setup.cfg"
+    include_default_pyproject_file = true
+    include_extra_files_in_package_data = true
+    auto_create_package_data_init_py_files = true
+  }
+  public_deps = [ ":ChipDeviceCtrl" ]
+  extra_files = []
+  if (chip_controller) {
+    extra_files += [ "${root_build_dir}/obj/src/controller/python/chip/_ChipDeviceCtrl.so > /chip/_ChipDeviceCtrl.so" ]
+  } else {
+    extra_files += [ "${root_build_dir}/obj/src/controller/python/chip/_ChipServer.so > /chip/_ChipServer.so" ]
+  }
 }
 
 chip_python_wheel_action("chip-core") {
